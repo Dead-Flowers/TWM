@@ -1,32 +1,48 @@
+from argparse import ArgumentParser
+
 import cv2
-from expression.collections import seq
 
 from .camera import frame_generator, video_capture
-from .gaze import FaceDetector
-from .gui import display_landmarks
+from .gaze import GazeDirectionPredictor
+from .gesture import GestureDetector
+from .gui import display_debug_window, start_gui
 from .utils import bgr_to_grayscale
 
 
-def main():
-    face_detector = FaceDetector()
+def build_parser() -> ArgumentParser:
+    parser = ArgumentParser()
+    parser.add_argument("-d", "--debug", action="store_true")
+    subparsers = parser.add_subparsers(dest="action")
+    gui_parser = subparsers.add_parser("gui")
+
+    return parser
+
+
+def main_loop(debug: bool = False) -> None:
+    gaze_predictor = GazeDirectionPredictor()
+    gesture_detector = GestureDetector()
 
     with video_capture(0) as capture:
-        processed_images = (
-            seq.of_iterable(frame_generator(capture))
-            .map(lambda image: (image, bgr_to_grayscale(image)))
-            .starmap(
-                lambda image_bgr, image_grayscale: (
-                    image_bgr,
-                    face_detector(image_grayscale),
-                )
-            )
-        )
-
-        for image, landmarks in processed_images:
-            display_landmarks(image, landmarks)
+        for image in frame_generator(capture):
+            landmarks = gaze_predictor.detect_landmarks(bgr_to_grayscale(image))
+            detections = gesture_detector.detect_objects(image)
+            if debug:
+                display_debug_window(image, landmarks, detections)
 
             if cv2.waitKey(delay=1) & 0xFF == ord("q"):
                 break
+
+
+def main() -> None:
+    parser = build_parser()
+    args = parser.parse_args()
+
+    match args.action:
+        case "gui":
+            start_gui()
+            main_loop(args.debug)
+        case _:
+            main_loop(args.debug)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ from collections import Counter, deque
 
 import pyautogui
 
-from .types import CursorDirection, Gesture
+from .types import GazeDirection, Gesture
 
 
 class InputController:
@@ -24,7 +24,7 @@ class InputController:
     def __call__(
         self,
         gesture: Gesture | None,
-        direction: CursorDirection | None,
+        direction: GazeDirection | None,
         delta_time: float,
     ) -> None:
         if gesture is None:
