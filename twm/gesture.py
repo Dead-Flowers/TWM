@@ -1,15 +1,23 @@
 import tensorflow as tf
 
 from .constants import OBJECT_DETECTOR_MODEL
-from .types import BoundingBox, Detections, Gesture, ImageType
+from .types import BoundingBox, DebugInfo, Detections, Gesture, ImageType
 
 # TODO
 GESTURE_CLASS_MAP = {
-    0: Gesture.SCROLL_UP,
-    1: Gesture.SCROLL_DOWN,
-    2: Gesture.CURSOR_MODE,
-    3: Gesture.LEFT_MOUSE_BTN,
-    4: Gesture.RIGHT_MOUSE_BTN,
+    2137: Gesture.SCROLL_UP,
+    2138: Gesture.SCROLL_DOWN,
+    2139: Gesture.CURSOR_MODE,
+    2140: Gesture.LEFT_MOUSE_BTN,
+    2141: Gesture.RIGHT_MOUSE_BTN,
+}
+
+FAKE_GESTURE_KEYS = {
+    "w": Gesture.SCROLL_UP,
+    "s": Gesture.SCROLL_DOWN,
+    "a": Gesture.LEFT_MOUSE_BTN,
+    "d": Gesture.RIGHT_MOUSE_BTN,
+    "e": Gesture.CURSOR_MODE,
 }
 
 
@@ -46,11 +54,18 @@ class GestureDetector:
 
         return results
 
-    def __call__(self, image: ImageType) -> Gesture | None:
+    def __call__(
+        self, image: ImageType, debug_info: DebugInfo | None = None
+    ) -> Gesture | None:
+        detections = self.detect_objects(image)
+
+        if debug_info:
+            debug_info.detections = detections
+
         return next(
             (
                 GESTURE_CLASS_MAP[det[0]]
-                for det in self.detect_objects(image)
+                for det in detections
                 if det[0] in GESTURE_CLASS_MAP
             ),
             None,

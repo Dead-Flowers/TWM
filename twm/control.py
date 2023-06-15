@@ -31,7 +31,7 @@ class InputController:
             return
 
         self.gesture_window.append(gesture)
-        most_common_gesture = Counter(self.gesture_window).most_common(1)[0]
+        most_common_gesture = Counter(self.gesture_window).most_common(1)[0][0]
 
         match most_common_gesture:
             case Gesture.CURSOR_MODE if direction:

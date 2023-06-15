@@ -6,7 +6,7 @@ from typing import Any, Generator, Generic, TypeVar
 
 import cv2
 
-from .types import Detections, GazeDirection, ImageType
+from .types import DebugInfo, Detections, GazeDirection, ImageType
 
 T = TypeVar("T")
 
@@ -66,16 +66,15 @@ def display_detections(image: ImageType, detections: Detections) -> None:
 
 def display_debug_window(
     image: ImageType,
-    detections: Detections,
     direction: GazeDirection,
-    ratios: tuple[float, float] | None,
+    debug_info: DebugInfo,
 ) -> None:
     display_gaze_direction(image, direction)
 
-    if ratios is not None:
-        display_gaze_ratios(image, *ratios)
+    if debug_info.gaze_ratios is not None:
+        display_gaze_ratios(image, *debug_info.gaze_ratios)
 
-    display_detections(image, detections)
+    display_detections(image, debug_info.detections)
     cv2.imshow("TWM - Debug", image)
 
 

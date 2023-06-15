@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 import numpy as np
@@ -32,3 +32,9 @@ class BoundingBox:
 
 ImageType = np.ndarray[int, np.dtype[np.uint8]]
 Detections = list[tuple[int, BoundingBox]]
+
+
+@dataclass
+class DebugInfo:
+    gaze_ratios: tuple[float, float] | None = None
+    detections: Detections = field(default_factory=list)

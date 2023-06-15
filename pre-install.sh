@@ -27,6 +27,8 @@ EOF
 
 poetry install
 poetry build
-mv dist/*.whl ../deps/
+
 cd -
+mkdir -p deps/
+mv GazeTracking/dist/*.whl deps/
 rm -rf GazeTracking/
