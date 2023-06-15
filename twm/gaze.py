@@ -1,48 +1,30 @@
-import dlib
-from expression import Nothing, Option, Some
+from gaze_tracking import GazeTracking
 
-from .constants import SHAPE_PREDICTOR_MODEL
-from .types import FaceLandmarks, GazeDirection, ImageType
-from .utils import min_bounding_box
+from .types import GazeDirection, ImageType
 
 
 class GazeDirectionPredictor:
     def __init__(self) -> None:
-        self.detector = dlib.get_frontal_face_detector()
-        self.predictor = dlib.shape_predictor(SHAPE_PREDICTOR_MODEL)
+        self._gaze_tracker = GazeTracking()
 
-    def detect_landmarks(self, image_grayscale: ImageType) -> Option[FaceLandmarks]:
-        faces = self.detector(image_grayscale)
+    def __call__(self, image: ImageType) -> GazeDirection:
+        self._gaze_tracker.refresh(image)
+        vertical_ratio = self._gaze_tracker.vertical_ratio()
 
-        if faces:
-            landmarks = self.predictor(image=image_grayscale, box=faces[0])
+        if self._gaze_tracker.is_right():
+            return GazeDirection.RIGHT
+        if self._gaze_tracker.is_left():
+            return GazeDirection.LEFT
+        if vertical_ratio is not None and vertical_ratio >= 0.65:
+            return GazeDirection.UP
+        if vertical_ratio is not None and vertical_ratio <= 0.35:
+            return GazeDirection.DOWN
 
-            return Some(
-                [(landmarks.part(n).x, landmarks.part(n).y) for n in range(0, 68)]
+        return GazeDirection.CENTER
+
+    def gaze_ratios(self) -> tuple[float, float] | None:
+        if self._gaze_tracker.pupils_located:
+            return (
+                self._gaze_tracker.horizontal_ratio(),
+                self._gaze_tracker.vertical_ratio(),
             )
-
-        return Nothing
-
-    def extract_eyes(
-        self, image: ImageType, landmarks: FaceLandmarks
-    ) -> tuple[ImageType, ImageType]:
-        left_eye_bb = min_bounding_box(landmarks[42:48])
-        right_eye_bb = min_bounding_box(landmarks[36:42])
-
-        return (
-            image[left_eye_bb.y1 : left_eye_bb.y2, left_eye_bb.x1 : left_eye_bb.x2],
-            image[right_eye_bb.y1 : right_eye_bb.y2, right_eye_bb.x1 : right_eye_bb.x2],
-        )
-
-    def predict_direction(
-        self, left_eye: ImageType, right_eye: ImageType
-    ) -> GazeDirection:
-        # TODO
-        raise NotImplementedError
-
-    def __call__(self, image_grayscale: ImageType) -> Option[GazeDirection]:
-        return (
-            self.detect_landmarks(image_grayscale)
-            .map(lambda landmarks: self.extract_eyes(image_grayscale, landmarks))
-            .map(lambda eyes: self.predict_direction(*eyes))
-        )

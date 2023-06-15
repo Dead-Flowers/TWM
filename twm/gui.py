@@ -1,12 +1,28 @@
 import tkinter as tk
+from contextlib import contextmanager
 from dataclasses import dataclass
-from threading import Thread
+from threading import Lock, Thread
+from typing import Any, Generator, Generic, TypeVar
 
 import cv2
-from expression import Option, Some
 
-from .types import Detections, FaceLandmarks, ImageType
-from .utils import Mutex
+from .types import Detections, GazeDirection, ImageType
+
+T = TypeVar("T")
+
+
+class Mutex(Generic[T]):
+    def __init__(self, value: T) -> None:
+        self.__value = value
+        self.__lock = Lock()
+
+    @contextmanager
+    def lock(self) -> Generator[T, Any, None]:
+        self.__lock.acquire()
+        try:
+            yield self.__value
+        finally:
+            self.__lock.release()
 
 
 @dataclass
@@ -19,17 +35,24 @@ class Settings:
 global_settings = Mutex(Settings())
 
 
-def display_landmarks(image: ImageType, landmarks: Option[FaceLandmarks]) -> None:
-    match landmarks:
-        case Some(landmarks_list):
-            for landmark in landmarks_list:
-                cv2.circle(
-                    img=image,
-                    center=landmark,
-                    radius=3,
-                    color=(0, 255, 0),
-                    thickness=-1,
-                )
+def display_gaze_direction(image: ImageType, direction: GazeDirection):
+    cv2.putText(
+        image, direction.name, (60, 60), cv2.FONT_HERSHEY_DUPLEX, 2, (255, 0, 0), 2
+    )
+
+
+def display_gaze_ratios(
+    image: ImageType, horizontal_ratio: float, vertical_ratio: float
+):
+    cv2.putText(
+        image,
+        f"{horizontal_ratio:.2f} {vertical_ratio:.2f}",
+        (120, 120),
+        cv2.FONT_HERSHEY_DUPLEX,
+        2,
+        (255, 0, 0),
+        2,
+    )
 
 
 def display_detections(image: ImageType, detections: Detections) -> None:
@@ -42,9 +65,16 @@ def display_detections(image: ImageType, detections: Detections) -> None:
 
 
 def display_debug_window(
-    image: ImageType, landmarks: Option[FaceLandmarks], detections: Detections
+    image: ImageType,
+    detections: Detections,
+    direction: GazeDirection,
+    ratios: tuple[float, float] | None,
 ) -> None:
-    display_landmarks(image, landmarks)
+    display_gaze_direction(image, direction)
+
+    if ratios is not None:
+        display_gaze_ratios(image, *ratios)
+
     display_detections(image, detections)
     cv2.imshow("TWM - Debug", image)
 

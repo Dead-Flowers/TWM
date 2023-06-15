@@ -1,5 +1,4 @@
 import tensorflow as tf
-from expression import Nothing, Option, Some
 
 from .constants import OBJECT_DETECTOR_MODEL
 from .types import BoundingBox, Detections, Gesture, ImageType
@@ -19,7 +18,7 @@ class GestureDetector:
         self.model = tf.saved_model.load(OBJECT_DETECTOR_MODEL)
 
     def detect_objects(
-        self, image: ImageType, confidence_threshold: float = 0.2
+        self, image: ImageType, confidence_threshold: float = 0.5
     ) -> Detections:
         detections = self.model(tf.convert_to_tensor(image)[tf.newaxis, ...])
 
@@ -47,12 +46,12 @@ class GestureDetector:
 
         return results
 
-    def __call__(self, image: ImageType) -> Option[Gesture]:
+    def __call__(self, image: ImageType) -> Gesture | None:
         return next(
             (
-                Some(GESTURE_CLASS_MAP[det[0]])
+                GESTURE_CLASS_MAP[det[0]]
                 for det in self.detect_objects(image)
                 if det[0] in GESTURE_CLASS_MAP
             ),
-            Nothing,
+            None,
         )

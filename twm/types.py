@@ -31,5 +31,4 @@ class BoundingBox:
 
 
 ImageType = np.ndarray[int, np.dtype[np.uint8]]
-FaceLandmarks = list[tuple[int, int]]
 Detections = list[tuple[int, BoundingBox]]

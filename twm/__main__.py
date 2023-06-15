@@ -2,11 +2,11 @@ from argparse import ArgumentParser
 
 import cv2
 
-from .camera import frame_generator, video_capture
 from .gaze import GazeDirectionPredictor
 from .gesture import GestureDetector
 from .gui import display_debug_window, start_gui
-from .utils import bgr_to_grayscale
+from .utils import equalize_histogram
+from .video import FrameReader
 
 
 def build_parser() -> ArgumentParser:
@@ -22,12 +22,16 @@ def main_loop(debug: bool = False) -> None:
     gaze_predictor = GazeDirectionPredictor()
     gesture_detector = GestureDetector()
 
-    with video_capture(0) as capture:
-        for image in frame_generator(capture):
-            landmarks = gaze_predictor.detect_landmarks(bgr_to_grayscale(image))
+    with FrameReader(0) as reader:
+        for image in reader:
+            eq_image = equalize_histogram(image)
+            direction = gaze_predictor(eq_image)
+            ratios = gaze_predictor.gaze_ratios()
             detections = gesture_detector.detect_objects(image)
+
             if debug:
-                display_debug_window(image, landmarks, detections)
+                display_debug_window(image, detections, direction, ratios)
+                cv2.imshow("TWM - Debug", image)
 
             if cv2.waitKey(delay=1) & 0xFF == ord("q"):
                 break
