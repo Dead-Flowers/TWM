@@ -1,0 +1,20 @@
+item {
+    name: 'ok'
+    id: 1
+}
+item {
+    name: 'rock'
+    id: 2
+}
+item {
+    name: 'point_up'
+    id: 3
+}
+item {
+    name: 'point_down'
+    id: 4
+}
+item {
+    name: 'open'
+    id: 5
+}
