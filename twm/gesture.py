@@ -3,13 +3,12 @@ import tensorflow as tf
 from .constants import OBJECT_DETECTOR_MODEL
 from .types import BoundingBox, DebugInfo, Detections, Gesture, ImageType
 
-# TODO
 GESTURE_CLASS_MAP = {
-    2137: Gesture.SCROLL_UP,
-    2138: Gesture.SCROLL_DOWN,
-    2139: Gesture.CURSOR_MODE,
-    2140: Gesture.LEFT_MOUSE_BTN,
-    2141: Gesture.RIGHT_MOUSE_BTN,
+    1: Gesture.LEFT_MOUSE_BTN,
+    2: Gesture.RIGHT_MOUSE_BTN,
+    3: Gesture.SCROLL_UP,
+    4: Gesture.SCROLL_DOWN,
+    5: Gesture.CURSOR_MODE,
 }
 
 FAKE_GESTURE_KEYS = {

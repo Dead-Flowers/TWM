@@ -41,7 +41,7 @@ def main_loop(debug: bool = False) -> None:
             input_controller(gesture, direction, curr_time - last_time)
 
             if debug:
-                display_debug_window(image, direction, debug_info)
+                display_debug_window(image, gesture, direction, debug_info)
                 cv2.imshow("TWM - Debug", image)
 
             last_key = chr(cv2.waitKey(delay=1) & 0xFF)

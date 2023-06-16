@@ -6,7 +6,7 @@ from typing import Any, Generator, Generic, TypeVar
 
 import cv2
 
-from .types import DebugInfo, Detections, GazeDirection, ImageType
+from .types import DebugInfo, Detections, GazeDirection, Gesture, ImageType
 
 T = TypeVar("T")
 
@@ -35,9 +35,21 @@ class Settings:
 global_settings = Mutex(Settings())
 
 
+def display_gesture(image: ImageType, gesture: Gesture):
+    cv2.putText(
+        image,
+        gesture.name,
+        (image.shape[1] - 300, 30),
+        cv2.FONT_HERSHEY_DUPLEX,
+        1,
+        (255, 0, 0),
+        1,
+    )
+
+
 def display_gaze_direction(image: ImageType, direction: GazeDirection):
     cv2.putText(
-        image, direction.name, (60, 60), cv2.FONT_HERSHEY_DUPLEX, 2, (255, 0, 0), 2
+        image, direction.name, (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 0, 0), 1
     )
 
 
@@ -47,11 +59,11 @@ def display_gaze_ratios(
     cv2.putText(
         image,
         f"{horizontal_ratio:.2f} {vertical_ratio:.2f}",
-        (120, 120),
+        (10, 60),
         cv2.FONT_HERSHEY_DUPLEX,
-        2,
+        1,
         (255, 0, 0),
-        2,
+        1,
     )
 
 
@@ -66,10 +78,15 @@ def display_detections(image: ImageType, detections: Detections) -> None:
 
 def display_debug_window(
     image: ImageType,
-    direction: GazeDirection,
+    gesture: Gesture | None,
+    direction: GazeDirection | None,
     debug_info: DebugInfo,
 ) -> None:
-    display_gaze_direction(image, direction)
+    if gesture:
+        display_gesture(image, gesture)
+
+    if direction:
+        display_gaze_direction(image, direction)
 
     if debug_info.gaze_ratios is not None:
         display_gaze_ratios(image, *debug_info.gaze_ratios)

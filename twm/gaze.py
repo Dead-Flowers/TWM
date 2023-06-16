@@ -9,7 +9,7 @@ class GazeDirectionPredictor:
 
     def __call__(
         self, image: ImageType, debug_info: DebugInfo | None = None
-    ) -> GazeDirection:
+    ) -> GazeDirection | None:
         self._gaze_tracker.refresh(image)
 
         if self._gaze_tracker.pupils_located:
@@ -27,5 +27,3 @@ class GazeDirectionPredictor:
                 return GazeDirection.UP
             if vertical_ratio <= 0.35:
                 return GazeDirection.DOWN
-
-        return GazeDirection.CENTER
