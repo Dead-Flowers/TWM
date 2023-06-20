@@ -2,8 +2,7 @@ import os
 import time
 import cv2
 
-IMG_PATH = "../tensorflow/workspace/images/"
-
+IMG_PATH = "./tensorflow/workspace/images/"
 
 os.makedirs(IMG_PATH, exist_ok=True)
 
@@ -16,14 +15,15 @@ for label in labels:
     print(f'Processing gesture: {label}')
     time.sleep(10)
     for i in range(num_images):
-        _, frame = cap.read()
+        start_time = time.time()
+        while True:
+            _, frame = capture.read()
+            cv2.imshow("", frame)
+            if time.time() - start_time > 2:
+                break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                exit()
         print(f"Capturing {i+1}/{num_images}")
-        path = os.path.join(IMG_PATH, label, f"{label}_{i}.jpg")
+        path = os.path.join(IMG_PATH, label, f"{label}_{i+60}.jpg")
         cv2.imwrite(path, frame)
-        cv2.imshow(f"{i+1}/{num_images}", frame)
-        time.sleep(2)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
     capture.release()
-
