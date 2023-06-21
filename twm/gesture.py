@@ -30,7 +30,6 @@ class GestureDetector:
     def detect_objects(
         self, image: ImageType, confidence_threshold: float = 0.7
     ) -> Detections:
-        #image = np.array(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         input_tensor = tf.convert_to_tensor(np.expand_dims(image, 0), dtype=tf.uint8)
         detections = self.model(input_tensor)
 

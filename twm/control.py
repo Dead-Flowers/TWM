@@ -9,8 +9,8 @@ from .types import GazeDirection, Gesture
 class InputController:
     def __init__(
         self,
-        cursor_speed: float = 10,
-        scroll_speed: float = 2,
+        cursor_speed: float = 50,
+        scroll_speed: float = 5,
         gesture_smoothing_window: int = 10,
     ) -> None:
         self.cursor_speed = cursor_speed
